@@ -3,7 +3,7 @@
 import copy
 import os
 
-from derl.yacs import CfgNode as CN
+from darei.yacs import CfgNode as CN
 
 # Global config object
 _C = CN()
@@ -405,8 +405,29 @@ _C.EVO = CN()
 # against random graph search.
 _C.EVO.IS_EVO = True
 
-# Number of prallel searches per node
+# Number of parallel searches per node
 _C.EVO.NUM_PROCESSES = 18
+
+_C.EVO.NUM_CPU_PROCESSES = 32
+
+# Number of GPUs available at workstation.
+_C.EVO.NUM_GPUS = 2
+
+# Number of worker processes to spawn per GPU.
+# This number should be changed based on the type of
+# GPU available.
+_C.EVO.NUM_WORKERS_PER_GPU = 2
+
+# Number of generations to run evolution for.
+_C.EVO.NUM_GENERATIONS = 10
+
+# Current generation number gets updated from
+# cmd line for each generation.
+_C.EVO.CUR_GEN_NUM = 0
+
+# Number of tournaments per generation
+_C.EVO.NUM_TOURNAMENTS_PER_GEN = 288
+
 
 # Population size
 _C.EVO.INIT_POPULATION_SIZE = 576
@@ -452,6 +473,17 @@ _C.EVO.SELECTION_CRITERIA = ["__reward__forward", "__reward__stand"]
 # to minimize energy and maximize speed. -1 means maximize and +1 means
 # minimize.
 _C.EVO.SELECTION_CRITERIA_OBJ = [-1, -1]
+
+# State of RL controller before each agent in the initial population is 
+# initialized. Only _random is supported (means that tabula rasa RL is employed).
+_C.EVO.POP_CONTROLLER_STATE_INITIAL = "controller_random"
+
+# Same as above, but determines how the weights of the child controller in
+# the later population will be initialized. _inherit_parent means that the child
+# controller is initialized using the weights of the parent.
+# _inherit_oldest means that the child controller will be initialized using the
+# weights of the older agent that will be culled to make space for the child.
+_C.EVO.CHILD_CONTROLLER_STATE_INITIAL = "controller_random"
 
 # --------------------------------------------------------------------------- #
 # CUDNN options
@@ -500,7 +532,13 @@ _C.NODE_ID = -1
 _C.NUM_NODES = 1
 
 # Unimal template path relative to the basedir
-_C.UNIMAL_TEMPLATE = "./derl/envs/assets/unimal.xml"
+_C.UNIMAL_TEMPLATE = "./darei/envs/assets/unimal.xml"
+
+# Number of parallel isaac gym envs
+_C.NUM_ISAAC_ENVS = 4096
+
+# IsaacGym env spacing
+_C.ISAAC_ENV_SPACING = 5.0
 
 
 def dump_cfg():

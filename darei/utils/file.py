@@ -16,6 +16,9 @@ def get_base_dir(docker=False):
     else:
         return "/home/derl/exp_dir"
 
+def file_exists(path):
+    """Checks if a path exists."""
+    return os.path.isfile(path)
 
 def get_files(_dir, reg_str, sort=False, sort_type=None):
     """Returns all files with regex in a folder."""
@@ -75,8 +78,11 @@ def chunkify(list_, num_chunks):
     return [list_[i : i + chunk_size] for i in range(0, len(list_), chunk_size)]
 
 
-def get_subfolder(name):
-    return os.path.join(cfg.OUT_DIR, name)
+def get_subfolder(name, config=None):
+    if config is None:
+        config = cfg
+    
+    return os.path.join(config.OUT_DIR, name)
 
 
 def get_taskdir(sweep_name, task_num, docker=False):
@@ -91,9 +97,12 @@ def get_taskdir(sweep_name, task_num, docker=False):
     )
 
 
-def id2path(id_, subfolder, base_dir=None, sweep_name=None, task_num=1):
+def id2path(id_, subfolder, base_dir=None, sweep_name=None, task_num=1, config=None):
+    if config is None:
+        config = cfg
+    
     if subfolder == "models":
-        ext = "pt"
+        ext = "pth"
     elif subfolder == "metadata" or subfolder == "error_metadata":
         ext = "json"
     elif subfolder == "xml":
@@ -104,13 +113,18 @@ def id2path(id_, subfolder, base_dir=None, sweep_name=None, task_num=1):
         ext = "json"
     elif subfolder == "images":
         ext = "jpg"
+    else:
+        raise ValueError(f"Invalid subfolder received: {subfolder}.")
 
     if base_dir is None and sweep_name is None:
-        base_dir = cfg.OUT_DIR
+        base_dir = config.OUT_DIR
     elif sweep_name:
         base_dir = get_taskdir(sweep_name, task_num)
 
-    return os.path.join(base_dir, subfolder, "{}.{}".format(id_, ext))
+    if subfolder == "models":
+        return os.path.join(base_dir, subfolder, "{}/nn/{}.{}".format(id_, id_, ext))
+    else:
+        return os.path.join(base_dir, subfolder, "{}.{}".format(id_, ext))
 
 
 def path2id(path):

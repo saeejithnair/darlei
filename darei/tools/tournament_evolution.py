@@ -87,6 +87,8 @@ def tournament_evolution(proc_id):
             e, "ERROR in tournament_evolution::train_agent: {}, process id: {}".format(child_id, proc_id), unimal_id=child_id
         )
 
+    sys.exit(1)
+
 def parse_args():
     """Parses the arguments."""
     parser = argparse.ArgumentParser()

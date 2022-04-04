@@ -9,7 +9,7 @@ from lxml import etree
 from darei.config import cfg
 from darei.utils import file as fu
 from darei.utils import geom as gu
-from derl.utils import mjpy as mu
+from darei.utils import mjpy as mu
 from darei.utils import sample as su
 from darei.utils import xml as xu
 

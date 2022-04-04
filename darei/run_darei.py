@@ -86,9 +86,9 @@ class DAREI:
                 err_exists = os.path.exists(is_error_path)
                 if err_exists or poll:
                     if err_exists:
-                        print(f"Relaunching process, error path detected {is_error_path}")
+                        print(f"Relaunching process {p.pid}, error path detected {is_error_path}")
                     else:
-                        print(f"Relaunching process, received poll value {poll}")
+                        print(f"Relaunching process {p.pid}, received poll value {poll}")
                     fu.remove_file(is_error_path)
                     p = self.relaunch_proc(p, proc_id, script_name, additional_args)
 

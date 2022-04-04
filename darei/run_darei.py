@@ -39,11 +39,11 @@ class DAREI:
             cuda_selection, script_name, cfg_path, proc_id, 
             cfg.NODE_ID, additional_args
         )
-        print(f"Launching cmd: {cmd}")
         p = subprocess.Popen(
             cmd, shell=True, executable="/bin/bash", preexec_fn=os.setsid,
             cwd=cwd
         )
+        print(f"PID {p.pid} launched cmd: {cmd}")
         return p
 
     def kill_pg(self, p):

@@ -1,4 +1,4 @@
-OUT_DIR: '/home/smnair/work/embodied-intelligence/darei/output/darei_evo_500_50'
+OUT_DIR: '/home/smnair/work/embodied-intelligence/darei/output/darei_evo_100_50'
 RNG_SEED: 1409
 ENV_NAME: 'Unimal-v0'
 UNIMAL_TEMPLATE: "/home/smnair/work/embodied-intelligence/darei/darei/envs/assets/unimal.xml"

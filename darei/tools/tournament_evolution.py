@@ -36,7 +36,7 @@ OmegaConf.register_new_resolver('if', lambda pred, a, b: a if pred else b)
 OmegaConf.register_new_resolver('resolve_default', lambda default, arg: default if arg=='' else arg)
 
 def tournament_evolution(proc_id):
-    seed = cfg.RNG_SEED + (cfg.NODE_ID * cfg.EVO.NUM_PROCESSES + proc_id) * 100
+    seed = cfg.RNG_SEED + (cfg.EVO.NUM_TOURNAMENTS_PER_GEN * cfg.EVO.NUM_GENERATIONS*cfg.EVO.CUR_GEN_NUM + proc_id) * 100
     min_searched_space_size = cfg.EVO.CUR_GEN_NUM * cfg.EVO.NUM_TOURNAMENTS_PER_GEN
     max_searched_space_size = min_searched_space_size + cfg.EVO.NUM_TOURNAMENTS_PER_GEN + cfg.EVO.INIT_POPULATION_SIZE
 

@@ -76,7 +76,13 @@ class DAREI:
                 is_error_path = os.path.join(
                     cfg.OUT_DIR, "{}_{}".format(cfg.NODE_ID, p.pid)
                 )
-                if os.path.exists(is_error_path) or poll:
+
+                err_exists = os.path.exists(is_error_path)
+                if err_exists or poll:
+                    if err_exists:
+                        print(f"Relaunching process, error path detected {is_error_path}")
+                    else:
+                        print(f"Relaunching process, received poll value {poll}")
                     fu.remove_file(is_error_path)
                     p = self.relaunch_proc(p, proc_id, script_name, additional_args)
 
@@ -100,6 +106,12 @@ class DAREI:
         """Trains generated unimals from initial population and serializes 
         model controllers to disk.
         """
+        init_done_path = os.path.join(cfg.OUT_DIR, "init_pop_done")
+
+        if os.path.isfile(init_done_path):
+            print("Population has already been initialized.")
+            return
+
         num_workers = (cfg.EVO.NUM_GPUS * cfg.EVO.NUM_WORKERS_PER_GPU)
         subprocs = []
         script_name = "tools/init_population.py"
@@ -113,6 +125,13 @@ class DAREI:
         self.wait_or_kill(subprocs, search_space_size=cfg.EVO.INIT_POPULATION_SIZE,
             script_name=script_name, additional_args=additional_args)
 
+        # Explicit file is needed as current population size can be less than
+        # initial population size. In fact after the first round of tournament
+        # selection population size can be as low as half of
+        Path(init_done_path).touch()
+        print(f"Initialized population")
+
+
     def run_tournament(self):
         num_workers = (cfg.EVO.NUM_GPUS * cfg.EVO.NUM_WORKERS_PER_GPU)
         subprocs = []
@@ -120,13 +139,19 @@ class DAREI:
         additional_args = f"NUM_ISAAC_ENVS {cfg.NUM_ISAAC_ENVS} ISAAC_ENV_SPACING {cfg.ISAAC_ENV_SPACING}"
         for cur_gen_idx in range(cfg.EVO.NUM_GENERATIONS):
             updated_args = f"{additional_args} EVO.CUR_GEN_NUM {cur_gen_idx}"
+            max_searched_space_size = (cfg.EVO.INIT_POPULATION_SIZE + 
+                (cur_gen_idx + 1) * cfg.EVO.NUM_TOURNAMENTS_PER_GEN)
+
+            if eu.get_population_size() >= max_searched_space_size:
+                print(f"Generation {cur_gen_idx} has already been evolved. Skipping.")
+                continue
+
             for idx in range(num_workers):
                 p = self.launch_subproc(idx, script_name, additional_args=updated_args)
                 subprocs.append((p, idx))
 
-            max_searched_space_size = (cfg.EVO.INIT_POPULATION_SIZE + 
-                (cur_gen_idx + 1) * cfg.EVO.NUM_TOURNAMENTS_PER_GEN)
 
+            print(f"Running tournament for generation {cur_gen_idx}. Expected max search space size is {max_searched_space_size}")
             self.wait_or_kill(subprocs, search_space_size=max_searched_space_size,
                 script_name=script_name, additional_args=updated_args)
 

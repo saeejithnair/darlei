@@ -6,8 +6,9 @@ import networkx as nx
 import random
 import sys
 import argparse
+import copy
 
-
+from darei import agent
 from darei.config import cfg
 from darei.envs.morphology import SymmetricUnimal
 from darei.utils import similarity as simu
@@ -15,7 +16,6 @@ from darei.utils import sample as su
 from darei.utils import file as fu
 from darei.utils import evo as eu
 from darei.utils import exception as exu
-from darei import agent
 
 import hydra
 from omegaconf import DictConfig, OmegaConf
@@ -46,7 +46,9 @@ def tournament_evolution(proc_id):
     # Initialize Hydra config
     initialize(config_path="../cfg")
 
-    while eu.get_searched_space_size() < max_searched_space_size:
+    cur_pop_size = eu.get_population_size()
+    print(f"Cur pop size: {cur_pop_size}, max pop size for gen {cfg.EVO.CUR_GEN_NUM}: {max_searched_space_size}")
+    while cur_pop_size < max_searched_space_size:
         su.set_seed(seed, use_strong_seeding=True)
         seed += 1
         parent_metadata = eu.select_parent(min_searched_space_size)
@@ -55,13 +57,13 @@ def tournament_evolution(proc_id):
         )
         parent_id = parent_metadata["id"]
         unimal = SymmetricUnimal(
-            child_id, init_path=fu.id2path(parent_id, "unimal_init"),
+            child_id, init_path=fu.id2path(parent_id, "unimal_init", config=copy.deepcopy(cfg)),
         )
         unimal.mutate()
         unimal.save()
 
-        asset_filename = fu.id2path(child_id, "xml")
-        model_output_dir = fu.id2path(child_id, "models")
+        asset_filename = fu.id2path(child_id, "xml", config=copy.deepcopy(cfg))
+        model_output_dir = os.path.join(cfg.OUT_DIR, "models")
         hydra_config = compose(config_name="config", overrides=[
             "task=Unimal", "headless=True", f"num_envs={num_parallel_envs}", 
             "pipeline=gpu", f"experiment={child_id}", 
@@ -70,11 +72,13 @@ def tournament_evolution(proc_id):
         ])
 
         try:
-            agent.train_agent(hydra_config)
+            agent.train_agent(hydra_config, yacs_cfg=copy.deepcopy(cfg))
+            print(f"Generation {cfg.EVO.CUR_GEN_NUM}, trained {child_id}")
         except Exception as e:
             exu.handle_exception(
-                e, "ERROR in init_population::train_agent: {}".format(child_id), unimal_id=child_id
+                e, "ERROR in tournament_evolution::train_agent: {}, process id: {}".format(child_id, proc_id), unimal_id=child_id
             )
+        cur_pop_size = eu.get_population_size()
 
 
     # # Even though video meta files are removed inside ppo, sometimes it might

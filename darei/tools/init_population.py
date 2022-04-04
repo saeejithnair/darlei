@@ -37,26 +37,20 @@ OmegaConf.register_new_resolver('if', lambda pred, a, b: a if pred else b)
 OmegaConf.register_new_resolver('resolve_default', lambda default, arg: default if arg=='' else arg)
 
 def init_done(unimal_id):
-    unimal_idx = int(unimal_id.split(".")[0].split("-")[1])
+    # unimal_idx = int(unimal_id.split(".")[0].split("-")[1])
     success_metadata = fu.get_files(fu.get_subfolder("metadata", config=copy.deepcopy(cfg)), ".*json")
     error_metadata = fu.get_files(fu.get_subfolder("error_metadata", config=copy.deepcopy(cfg)), ".*json")
     done_metadata = success_metadata + error_metadata
-    done_idx = [
-        int(path.split("/")[-1].split("-")[2].split(".")[0])
+    done_ids = [
+        path.split("/")[-1].split(".")[0]
         for path in done_metadata
     ]
-    if unimal_idx in done_idx:
+    if unimal_id in done_ids:
         return True
     else:
         return False
 
 def init_population(proc_id):
-    init_done_path = os.path.join(cfg.OUT_DIR, "init_pop_done")
-
-    if os.path.isfile(init_done_path):
-        print("Population has already been initialized.")
-        return
-
     # Divide work by num nodes and then num procs
     xml_paths = fu.get_files(
         fu.get_subfolder("xml", config=copy.deepcopy(cfg)), ".*xml", sort=True, sort_type="time"
@@ -91,17 +85,11 @@ def init_population(proc_id):
             agent.train_agent(hydra_config, yacs_cfg=copy.deepcopy(cfg))
         except Exception as e:
             exu.handle_exception(
-                e, "ERROR in init_population::train_agent: {}".format(unimal_id), unimal_id=unimal_id
+                e, "ERROR in init_population::train_agent: {}, process id: {}".format(unimal_id, proc_id), unimal_id=unimal_id
             )
 
         if eu.get_population_size() >= cfg.EVO.INIT_POPULATION_SIZE:
             break
-
-    # Explicit file is needed as current population size can be less than
-    # initial population size. In fact after the first round of tournament
-    # selection population size can be as low as half of
-    Path(init_done_path).touch()
-    print(f"Initialized population")
 
 def parse_args():
     """Parses the arguments."""

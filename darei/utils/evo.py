@@ -48,7 +48,7 @@ def get_dominate_mask(metadatas):
     rew_keys = cfg.EVO.SELECTION_CRITERIA
     rews = []
     for m in metadatas:
-        rews.append([m[rew_key] for rew_key in rew_keys])
+        rews.append([float(m[rew_key]) for rew_key in rew_keys])
 
     dominate_mask = is_pareto_efficient(
         cfg.EVO.SELECTION_CRITERIA_OBJ * np.asarray(rews)
@@ -57,7 +57,7 @@ def get_dominate_mask(metadatas):
 
 
 def aging_tournament(min_searched_space_size):
-    metadata_paths = fu.get_files(fu.get_subfolder("metadata"), ".*json")
+    metadata_paths = fu.get_files(fu.get_subfolder("metadata", config=copy.deepcopy(cfg)), ".*json")
     metadata_paths = sorted(metadata_paths, key=os.path.getmtime)
     metadata_paths = metadata_paths[min_searched_space_size :]
 
@@ -118,7 +118,7 @@ def get_parent_id(child_id):
 
 def get_searched_space_size():
     """Returns total number of unimals generated so far."""
-    return len(os.listdir(fu.get_subfolder("models")))
+    return len(os.listdir(fu.get_subfolder("models", config=copy.deepcopy(cfg))))
 
 
 def get_population_size():

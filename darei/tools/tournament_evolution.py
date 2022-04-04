@@ -35,11 +35,12 @@ OmegaConf.register_new_resolver('if', lambda pred, a, b: a if pred else b)
 # num_ensv
 OmegaConf.register_new_resolver('resolve_default', lambda default, arg: default if arg=='' else arg)
 
-def tournament_evolution(proc_id):
-    seed = cfg.RNG_SEED + (cfg.EVO.NUM_TOURNAMENTS_PER_GEN * cfg.EVO.NUM_GENERATIONS*cfg.EVO.CUR_GEN_NUM + proc_id) * 100
-    min_searched_space_size = cfg.EVO.CUR_GEN_NUM * cfg.EVO.NUM_TOURNAMENTS_PER_GEN
-    max_searched_space_size = min_searched_space_size + cfg.EVO.NUM_TOURNAMENTS_PER_GEN + cfg.EVO.INIT_POPULATION_SIZE
+def compute_cur_generation(cur_pop_size):
+    cur_gen = (cur_pop_size - cfg.EVO.INIT_POPULATION_SIZE)//cfg.EVO.NUM_TOURNAMENTS_PER_GEN
 
+    return cur_gen
+
+def tournament_evolution(proc_id):
     num_parallel_envs = cfg.NUM_ISAAC_ENVS
     env_spacing = cfg.ISAAC_ENV_SPACING
     horizon_length = cfg.ISAAC_HORIZON_LENGTH
@@ -48,50 +49,43 @@ def tournament_evolution(proc_id):
     initialize(config_path="../cfg")
 
     cur_pop_size = eu.get_population_size()
-    print(f"Cur pop size: {cur_pop_size}, max pop size for gen {cfg.EVO.CUR_GEN_NUM}: {max_searched_space_size}")
-    while cur_pop_size < max_searched_space_size:
-        su.set_seed(seed, use_strong_seeding=True)
-        seed += 1
-        parent_metadata = eu.select_parent(min_searched_space_size)
-        child_id = "{}-{}-{}".format(
-            cfg.NODE_ID, proc_id, datetime.now().strftime("%d-%H-%M-%S")
+    cur_gen = compute_cur_generation(cur_pop_size)
+
+    min_searched_space_size = cur_gen * cfg.EVO.NUM_TOURNAMENTS_PER_GEN
+    max_searched_space_size = min_searched_space_size + cfg.EVO.NUM_TOURNAMENTS_PER_GEN + cfg.EVO.INIT_POPULATION_SIZE
+    print(f"Cur pop size: {cur_pop_size}, max pop size for gen {cur_gen}: {max_searched_space_size}")
+
+    seed = cfg.RNG_SEED + (cfg.EVO.NUM_TOURNAMENTS_PER_GEN * cfg.EVO.NUM_GENERATIONS*(cfg.NODE_ID + cur_gen) + proc_id) * 100
+    su.set_seed(seed, use_strong_seeding=True)
+    seed += 1
+    parent_metadata = eu.select_parent(min_searched_space_size)
+    child_id = "{}-{}-{}".format(
+        cfg.NODE_ID, proc_id, datetime.now().strftime("%d-%H-%M-%S")
+    )
+    parent_id = parent_metadata["id"]
+    unimal = SymmetricUnimal(
+        child_id, init_path=fu.id2path(parent_id, "unimal_init", config=copy.deepcopy(cfg)),
+    )
+    unimal.mutate()
+    unimal.save()
+
+    asset_filename = fu.id2path(child_id, "xml", config=copy.deepcopy(cfg))
+    model_output_dir = os.path.join(cfg.OUT_DIR, "models")
+    hydra_config = compose(config_name="config", overrides=[
+        "task=Unimal", "headless=True", f"num_envs={num_parallel_envs}", 
+        "pipeline=gpu", f"experiment={child_id}", 
+        f"assetFileName={asset_filename}", f"output_dir={model_output_dir}", 
+        f"env_spacing={env_spacing}", f"parent_name={parent_id}",
+        f"horizon_length={horizon_length}"
+    ])
+
+    try:
+        agent.train_agent(hydra_config, yacs_cfg=copy.deepcopy(cfg))
+        print(f"Generation {cur_gen}, trained {child_id}")
+    except Exception as e:
+        exu.handle_exception(
+            e, "ERROR in tournament_evolution::train_agent: {}, process id: {}".format(child_id, proc_id), unimal_id=child_id
         )
-        parent_id = parent_metadata["id"]
-        unimal = SymmetricUnimal(
-            child_id, init_path=fu.id2path(parent_id, "unimal_init", config=copy.deepcopy(cfg)),
-        )
-        unimal.mutate()
-        unimal.save()
-
-        asset_filename = fu.id2path(child_id, "xml", config=copy.deepcopy(cfg))
-        model_output_dir = os.path.join(cfg.OUT_DIR, "models")
-        hydra_config = compose(config_name="config", overrides=[
-            "task=Unimal", "headless=True", f"num_envs={num_parallel_envs}", 
-            "pipeline=gpu", f"experiment={child_id}", 
-            f"assetFileName={asset_filename}", f"output_dir={model_output_dir}", 
-            f"env_spacing={env_spacing}", f"parent_name={parent_id}",
-            f"horizon_length={horizon_length}"
-        ])
-
-        try:
-            agent.train_agent(hydra_config, yacs_cfg=copy.deepcopy(cfg))
-            print(f"Generation {cfg.EVO.CUR_GEN_NUM}, trained {child_id}")
-        except Exception as e:
-            exu.handle_exception(
-                e, "ERROR in tournament_evolution::train_agent: {}, process id: {}".format(child_id, proc_id), unimal_id=child_id
-            )
-        cur_pop_size = eu.get_population_size()
-
-
-    # # Even though video meta files are removed inside ppo, sometimes it might
-    # # fail in between creating video. In such cases, we just remove the video
-    # # metadata file as master proc uses absence of meta files as sign of completion.
-    # video_dir = fu.get_subfolder("videos")
-    # video_meta_files = fu.get_files(
-    #     video_dir, "{}-{}-.*json".format(cfg.NODE_ID, idx)
-    # )
-    # for video_meta_file in video_meta_files:
-    #     fu.remove_file(video_meta_file)
 
 def parse_args():
     """Parses the arguments."""

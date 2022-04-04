@@ -136,30 +136,22 @@ class DAREI:
         # selection population size can be as low as half of
         Path(init_done_path).touch()
         print(f"Initialized population")
-
-
+    
     def run_tournament(self):
         num_workers = (cfg.EVO.NUM_GPUS * cfg.EVO.NUM_WORKERS_PER_GPU)
         subprocs = []
         script_name = "tools/tournament_evolution.py"
         additional_args = f"NUM_ISAAC_ENVS {cfg.NUM_ISAAC_ENVS} ISAAC_ENV_SPACING {cfg.ISAAC_ENV_SPACING}"
-        for cur_gen_idx in range(cfg.EVO.NUM_GENERATIONS):
-            updated_args = f"{additional_args} EVO.CUR_GEN_NUM {cur_gen_idx}"
-            max_searched_space_size = (cfg.EVO.INIT_POPULATION_SIZE + 
-                (cur_gen_idx + 1) * cfg.EVO.NUM_TOURNAMENTS_PER_GEN)
+        max_searched_space_size = (cfg.EVO.INIT_POPULATION_SIZE + 
+                (cfg.EVO.NUM_GENERATIONS * cfg.EVO.NUM_TOURNAMENTS_PER_GEN))
 
-            if eu.get_population_size() >= max_searched_space_size:
-                print(f"Generation {cur_gen_idx} has already been evolved. Skipping.")
-                continue
-
-            for idx in range(num_workers):
-                p = self.launch_subproc(idx, script_name, additional_args=updated_args)
+        print(f"Launching {num_workers} workers to execute tournament evolution.")
+        for idx in range(num_workers):
+                p = self.launch_subproc(idx, script_name, additional_args=additional_args)
                 subprocs.append((p, idx))
 
-
-            print(f"Running tournament for generation {cur_gen_idx}. Expected max search space size is {max_searched_space_size}")
-            self.wait_or_kill(subprocs, search_space_size=max_searched_space_size,
-                script_name=script_name, additional_args=updated_args)
+        self.wait_or_kill(subprocs, search_space_size=max_searched_space_size,
+            script_name=script_name, additional_args=additional_args)
 
     def setup_population(self):
         """Generates unimals in initial population and serializes to disk in 

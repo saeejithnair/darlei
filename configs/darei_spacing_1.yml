@@ -1,0 +1,36 @@
+OUT_DIR: '/home/smnair/work/embodied-intelligence/darei/output/darei_spacing_1'
+RNG_SEED: 1409
+ENV_NAME: 'Unimal-v0'
+UNIMAL_TEMPLATE: "/home/smnair/work/embodied-intelligence/darei/darei/envs/assets/unimal.xml"
+ISAAC_ENV_SPACING: 1.0
+NUM_ISAAC_ENVS: 8192
+ISAAC_HORIZON_LENGTH: 16
+EVO:
+  IS_EVO: true
+  SELECTION_CRITERIA: ["reward"]
+  SELECTION_CRITERIA_OBJ: [-1]
+  NUM_PROCESSES: 4
+  NUM_CPU_PROCESSES: 32
+  INIT_POPULATION_SIZE: 20
+  NUM_TOURNAMENTS_PER_GEN: 10
+  NUM_GENERATIONS: 1
+  NUM_WORKERS_PER_GPU: 5
+  NUM_PARTICIPANTS: 4
+PPO:
+  NUM_ENVS: 16
+  TIMESTEPS: 256
+  MAX_STATE_ACTION_PAIRS: 1e4
+  VIDEO_LENGTH: 100
+ENV:
+  MODULES: ["Agent", "Terrain"]
+  TASK: "locomotion"
+  KEYS_TO_KEEP: ["proprioceptive"]
+  OBS_TYPES: ["position", "velocity", "imu_vel", "touch", "extremities"]
+TERRAIN:
+  SIZE: [75, 75, 1]
+  START_FLAT: 3
+  CENTER_FLAT: 0
+  TYPES: ["curve_slope"]
+  FLAT_LENGTH_RANGE: [75, 75, 1]
+  BOUNDARY_WALLS: true
+NODE_ID: 0

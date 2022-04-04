@@ -6,6 +6,7 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 from hydra.utils import to_absolute_path
 import re
+import time
 
 import isaacgym
 from isaacgymenvs.utils.reformat import omegaconf_to_dict, print_dict
@@ -88,7 +89,7 @@ def build_runner(algo_observer):
     return runner
 
 
-def save_metadata(model_output_dir, unimal_id, max_epochs, parent_id=None, yacs_cfg=None):
+def save_metadata(model_output_dir, unimal_id, max_epochs, train_time, parent_id=None, yacs_cfg=None):
     reg_str = r'.*\[(.*)\].pth'
     model_files = fu.get_files(model_output_dir, reg_str, sort=True, sort_type="time")
     best_model = model_files[-1]
@@ -100,6 +101,7 @@ def save_metadata(model_output_dir, unimal_id, max_epochs, parent_id=None, yacs_
     metadata = {}
     metadata["reward"] = reward
     metadata["id"] = unimal_id
+    metadata["train_time"] = train_time
 
     if parent_id == None or parent_id == 'None':
         metadata["lineage"] = "{}".format(unimal_id)
@@ -158,16 +160,20 @@ def train_agent(hydra_cfg: DictConfig, yacs_cfg=None):
     with open(os.path.join(experiment_dir, 'config.yaml'), 'w') as f:
         f.write(OmegaConf.to_yaml(hydra_cfg))
 
+    start = time.time()
     runner.run({
         'train': not hydra_cfg.test,
         'play': hydra_cfg.test,
     })
+    end = time.time()
+    time_elapsed = end - start
 
     # Dir where model actually gets saved. IsaacGym creates "nn" subfolder automatically.
     model_output_dir = os.path.join(experiment_dir, 'nn')
     save_metadata(model_output_dir, 
                   hydra_cfg.train.params.config.name, 
                   hydra_cfg.train.params.config.max_epochs,
+                  train_time=time_elapsed,
                   parent_id=hydra_cfg.train.params.config.parent_name,
                   yacs_cfg=yacs_cfg)
 

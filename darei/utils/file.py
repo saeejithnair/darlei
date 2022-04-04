@@ -6,8 +6,8 @@ import re
 
 import yaml
 
-from derl.config import cfg
-from derl.utils import xml as xu
+from darei.config import cfg
+from darei.utils import xml as xu
 
 
 def get_base_dir(docker=False):

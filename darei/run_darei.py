@@ -13,6 +13,7 @@ from darei.tools import evolution
 from darei.utils import evo as eu
 import time
 import signal
+import psutil
 
 class DAREI:
     def __init__(self) -> None:
@@ -48,7 +49,12 @@ class DAREI:
     def kill_pg(self, p):
         try:
             os.killpg(os.getpgid(p.pid), signal.SIGTERM)
+            time.sleep(5)
+            if psutil.pid_exists(p.pid):
+                print(f"Sending SIGKILL to process {p.pid}")
+                os.killpg(os.getpgid(p.pid), signal.SIGKILL)
         except ProcessLookupError:
+            print(f"Encountered ProcessLookupError exception for process {p.pid}")
             pass
 
 

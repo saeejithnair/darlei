@@ -50,6 +50,9 @@ parent_name: None
 
 env_spacing: 5.0
 
+horizon_length: 16
+
+
 # set default task and default training config based on task
 defaults:
   - task: Unimal

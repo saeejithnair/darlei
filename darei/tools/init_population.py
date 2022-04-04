@@ -62,6 +62,7 @@ def init_population(proc_id):
 
     num_parallel_envs = cfg.NUM_ISAAC_ENVS
     env_spacing = cfg.ISAAC_ENV_SPACING
+    horizon_length = cfg.ISAAC_HORIZON_LENGTH
 
     initialize(config_path="../cfg")
 
@@ -78,7 +79,7 @@ def init_population(proc_id):
             "task=Unimal", "headless=True", f"num_envs={num_parallel_envs}", 
             "pipeline=gpu", f"experiment={unimal_id}", 
             f"assetFileName={asset_filename}", f"output_dir={model_output_dir}", 
-            f"env_spacing={env_spacing}"
+            f"env_spacing={env_spacing}", f"horizon_length={horizon_length}"
         ])
 
         try:

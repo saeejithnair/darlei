@@ -540,6 +540,7 @@ _C.NUM_ISAAC_ENVS = 4096
 # IsaacGym env spacing
 _C.ISAAC_ENV_SPACING = 5.0
 
+_C.ISAAC_HORIZON_LENGTH = 16
 
 def dump_cfg():
     """Dumps the config to the output directory."""

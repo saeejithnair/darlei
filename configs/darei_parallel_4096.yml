@@ -1,10 +1,10 @@
-OUT_DIR: '/home/smnair/work/embodied-intelligence/darei/output/test_darei'
+OUT_DIR: '/home/smnair/work/embodied-intelligence/darei/output/darei_parallel_2048'
 RNG_SEED: 1409
 ENV_NAME: 'Unimal-v0'
 UNIMAL_TEMPLATE: "/home/smnair/work/embodied-intelligence/darei/darei/envs/assets/unimal.xml"
 ISAAC_ENV_SPACING: 5.0
 NUM_ISAAC_ENVS: 4096
-ISAAC_HORIZON_LENGTH: 16
+ISAAC_HORIZON_LENGTH: 32
 EVO:
   IS_EVO: true
   SELECTION_CRITERIA: ["reward"]

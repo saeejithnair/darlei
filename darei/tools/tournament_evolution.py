@@ -42,6 +42,7 @@ def tournament_evolution(proc_id):
 
     num_parallel_envs = cfg.NUM_ISAAC_ENVS
     env_spacing = cfg.ISAAC_ENV_SPACING
+    horizon_length = cfg.ISAAC_HORIZON_LENGTH
 
     # Initialize Hydra config
     initialize(config_path="../cfg")
@@ -68,7 +69,8 @@ def tournament_evolution(proc_id):
             "task=Unimal", "headless=True", f"num_envs={num_parallel_envs}", 
             "pipeline=gpu", f"experiment={child_id}", 
             f"assetFileName={asset_filename}", f"output_dir={model_output_dir}", 
-            f"env_spacing={env_spacing}", f"parent_name={parent_id}"
+            f"env_spacing={env_spacing}", f"parent_name={parent_id}",
+            f"horizon_length={horizon_length}"
         ])
 
         try:

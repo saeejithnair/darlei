@@ -1,2 +1,2 @@
-# darei
-Deep Accelerated Research in Embodied Intelligence
+# DARLEI
+Deep Accelerated Reinforcement Learning with Evolutionary Intelligence

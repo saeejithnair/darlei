@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Deep Accelerated Reinforcement Learning with Evolutionary Intelligence.">
+  <meta name="keywords" content="DARLEI, evolution, embodied intelligence, reinforcement-learning, RL, open-endedness">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DARLEI: Deep Accelerated Reinforcement Learning with Evolutionary Intelligence</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7WWZGS579Q"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-7WWZGS579Q');
+  </script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+
+  <script src="./static/js/jquery.min.js"></script>
+  <script src="./static/js/jquery-1.10.2.js"></script>
+  <!-- <link href="./src/css/css" rel="stylesheet"> -->
+  <!-- <link href="./src/css/css(1)" rel="stylesheet"> -->
+  <!-- <link href="./src/css/share.min.css" rel="stylesheet"> -->
+  <!-- <script src="./static/js/social-share.min.js"></script> -->
+  <!--Slider-->
+  <link rel="stylesheet" href="./static/css/dics.min.css">
+  <script src="./static/js/dics.min.js"></script>
+  <!--Magnifier-->
+  <link rel="stylesheet" href="./static/css/magnifier.css">
+  <!-- <script src="./static/js/magnifier.js"></script> -->
+
+  <!-- Magnifier -->
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    .img-magnifier-container {
+      position: relative;
+    }
+
+    .img-magnifier-glass {
+      position: absolute;
+      border: 3px solid #24d824;
+      border-radius: 50%;
+      cursor: none;
+      /*Set the size of the magnifier glass:*/
+      width: 150px;
+      height: 150px;
+    }
+
+    .text {
+      text-align: center;
+      width: 80%;
+      margin: auto;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .caption-container {
+      font-size: 2vw;
+      text-align: center;
+    }
+
+    img {
+      max-width: 80%;
+      height: auto;
+    }
+
+    .figure-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .ground-truth-color {
+      color: black;
+    }
+
+    .nerf-color {
+      color: gray;
+    }
+
+    .nas-nerf-s-color {
+      color: green;
+    }
+
+    .nas-nerf-xs-color {
+      color: blue;
+    }
+
+    .nas-nerf-xxs-color {
+      color: red;
+    }
+  </style>
+
+  <script>
+    function magnify(imgID, zoom) {
+      var img, glass, w, h, bw;
+      img = document.getElementById(imgID);
+      /*create magnifier glass:*/
+      glass = document.createElement("DIV");
+      glass.setAttribute("class", "img-magnifier-glass");
+      /*insert magnifier glass:*/
+      img.parentElement.insertBefore(glass, img);
+      /*set background properties for the magnifier glass:*/
+      glass.style.backgroundImage = "url('" + img.src + "')";
+      glass.style.backgroundRepeat = "no-repeat";
+      glass.style.backgroundSize = (img.width * zoom) + "px " + (img.height * zoom) + "px";
+      bw = 3;
+      w = glass.offsetWidth / 2;
+      h = glass.offsetHeight / 2;
+      /*execute a function when someone moves the magnifier glass over the image:*/
+      glass.addEventListener("mousemove", moveMagnifier);
+      img.addEventListener("mousemove", moveMagnifier);
+      /*and also for touch screens:*/
+      glass.addEventListener("touchmove", moveMagnifier);
+      img.addEventListener("touchmove", moveMagnifier);
+
+      function moveMagnifier(e) {
+        var pos, x, y;
+        /*prevent any other actions that may occur when moving over the image*/
+        e.preventDefault();
+        /*get the cursor's x and y positions:*/
+        pos = getCursorPos(e);
+        x = pos.x;
+        y = pos.y;
+        /*prevent the magnifier glass from being positioned outside the image:*/
+        if (x > img.width - (w / zoom)) { x = img.width - (w / zoom); }
+        if (x < w / zoom) { x = w / zoom; }
+        if (y > img.height - (h / zoom)) { y = img.height - (h / zoom); }
+        if (y < h / zoom) { y = h / zoom; }
+
+        /*set the position of the magnifier glass:*/
+        if (glass.style.backgroundImage == "") {
+          glass.style.backgroundImage = "url('" + img.src + "')";
+        }
+        if (glass.style.border == "0px") {
+          glass.style.border = "3px solid #24d824";
+        }
+        glass.style.left = (x - w) + "px";
+        glass.style.top = (y - h) + "px";
+
+        /*display what the magnifier glass "sees":*/
+        glass.style.backgroundPosition = "-" + ((x * zoom) - w + bw) + "px -" + ((y * zoom) - h + bw) + "px";
+
+        e = e || window.event;
+        /*get the x and y positions of the image:*/
+        a = img.getBoundingClientRect();
+        if (e.pageX < a.left || e.pageX > a.left + img.width ||
+          e.pageY < a.top || e.pageY > a.top + img.height) {
+          glass.style.backgroundImage = "";
+          // glass.style.backgroundSize = "0px";
+          glass.style.border = "0px";
+          // glass.remove();
+        }
+      }
+
+      function getCursorPos(e) {
+        var a, x = 0, y = 0;
+        e = e || window.event;
+        /*get the x and y positions of the image:*/
+        a = img.getBoundingClientRect();
+        /*calculate the cursor's x and y coordinates, relative to the image:*/
+        x = e.pageX - a.left;
+        y = e.pageY - a.top;
+        /*consider any page scrolling:*/
+        x = x - window.pageXOffset;
+        y = y - window.pageYOffset;
+        return { x: x, y: y };
+      }
+
+    }
+  </script>
+  <!-- Magnifier -->
+</head>
+
+<body>
+
+  <nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
+    </div>
+    <div class="navbar-menu">
+      <div class="navbar-end">
+        <!-- Lab link with logo -->
+        <a class="navbar-item" href="https://vip.uwaterloo.ca/">
+          <img src="./static/viplogo.png" alt="Lab Logo" width="54" height="32" style="margin-right: 0.5em;">
+          <!-- Adjust the size as needed -->
+          Vision and Image Processing Lab
+        </a>
+      </div>
+    </div>
+  </nav>
+
+
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title">DARLEI: Deep Accelerated Reinforcement Learning with Evolutionary
+              Intelligence</h1>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">
+                <a href="https://vip.uwaterloo.ca/">Saeejith Nair</a><sup>1</sup>,</span>
+              <span class="author-block">
+                <a href="https://vip.uwaterloo.ca/">Mohammad Javad Shafiee</a><sup>1</sup>,
+              </span>
+              <span class="author-block">
+                <a href="https://vip.uwaterloo.ca/">Alexander Wong</a><sup>1</sup>
+              </span>
+            </div>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block"><sup>1</sup>Vision and Image Processing Lab, University of
+                Waterloo&ensp;</span>
+            </div>
+
+            <div class="column has-text-centered">
+              <div class="publication-links">
+                <!-- PDF Link. -->
+                <span class="link-block">
+                  <a href="https://youtu.be/dQw4w9WgXcQ" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                    </span>
+                    <span>Paper (Coming Soon)</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://youtu.be/dQw4w9WgXcQ" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                    </span>
+                    <span>arXiv (Coming Soon)</span>
+                  </a>
+                </span>
+                <!-- Video Link. -->
+                <!-- <span class="link-block">
+                  <a href="https://youtu.be/dQw4w9WgXcQ" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fab fa-youtube"></i>
+                    </span>
+                    <span>Video</span>
+                  </a>
+                </span> -->
+                <!-- Code Link. -->
+                <span class="link-block">
+                  <a href="https://github.com/saeejithnair/darlei"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fab fa-github"></i>
+                    </span>
+                    <span>Code</span>
+                  </a>
+                </span>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <!-- Abstract. -->
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Abstract</h2>
+          <div class="content has-text-justified">
+            <p>
+              We present DARLEI, a framework that combines evolutionary algorithms with parallelized reinforcement
+              learning for
+              efficiently training and evolving populations of UNIMAL agents. Our approach utilizes Proximal Policy
+              Optimization (PPO)
+              for individual agent learning and pairs it with a tournament selection-based generational learning
+              mechanism to foster
+              morphological evolution. By building on Nvidia's Isaac Gym, DARLEI leverages GPU accelerated simulation to
+              achieve over
+              20x speedup using just a single workstation, compared to previous work which required large distributed
+              CPU clusters. We
+              systematically characterize DARLEI's performance under various conditions, revealing factors impacting
+              diversity of
+              evolved morphologies. For example, by enabling inter-agent collisions within the simulator, we find that
+              we can simulate
+              some multi-agent interactions between the same morphology, and see how it influences individual agent
+              capabilities and
+              long-term evolutionary adaptation. While current results demonstrate limited diversity across generations,
+              we hope to
+              extend DARLEI in future work to include interactions between diverse morphologies in richer environments,
+              and create a
+              platform that allows for coevolving populations and investigating emergent behaviours in them.
+            </p><br></br>
+          </div>
+        </div>
+      </div>
+      <!--/ Abstract. -->
+    </div>
+
+    <!-- Qualitative images
+    <section class="section">
+      <div class="venue" align="center">
+        <p> <i><b>Hover over image</b> to move the zoomed in patch; <b>Click on ground-truth image</b> to switch to a
+            different image (best viewed on desktop).</i></p>
+      </div>
+      <div class="img-zoom-container" align="center">
+        <figure display="inline-block">
+          <figcaption class="ground-truth-color"><b>Ground Truth</b></figcaption>
+          <div class="img-zoom-lens"></div>
+          <img id="reference_mesh" src="./static/images/Ground-Truth/000.png"
+            data-image="./static/images/Ground-Truth/">
+        </figure>
+
+        <figure display="inline-block">
+          <figcaption class="nerf-color"><b>NeRF</b></figcaption>
+          <div id="zoomed-nerf_rgb" class="img-zoom-result" data-image="./static/images/NAS-NeRF-S/"
+            style="background-image: url(./static/images/NAS-NeRF-S/000.png); background-size: 0px 720px;"></div>
+          <div class="arch-details nerf-color" data-arch="NeRF"></div>
+        </figure>
+
+        <figure display="inline-block">
+          <figcaption class="nas-nerf-s-color"><b>NAS-NeRF S</b></figcaption>
+          <div id="zoomed-nas-nerf-s_rgb" class="img-zoom-result" data-image="./static/images/NAS-NeRF-S/"
+            style="background-image: url(./static/images/NAS-NeRF-S/000.png); background-size: 0px 720px;"></div>
+          <div class="arch-details nas-nerf-s-color" data-arch="NAS-NeRF-S"></div>
+        </figure>
+
+        <figure display="inline-block">
+          <figcaption class="nas-nerf-xs-color"><b>NAS-NeRF XS</b></figcaption>
+          <div id="zoomed-nas-nerf-xs_rgb" class="img-zoom-result" data-image="./static/images/NAS-NeRF-XS/"
+            style="background-image: url(./static/images/NAS-NeRF-XS/000.png); background-size: 0px 720px;"></div>
+          <div class="arch-details nas-nerf-xs-color" data-arch="NAS-NeRF-XS"></div>
+        </figure>
+
+        <figure display="inline-block">
+          <figcaption class="nas-nerf-xxs-color"><b>NAS-NeRF XXS</b></figcaption>
+          <div id="zoomed-nas-nerf-xxs_rgb" class="img-zoom-result" data-image="./static/images/NAS-NeRF-XXS/"
+            style="background-image: url(./static/images/NAS-NeRF-XXS/000.png); background-size: 0px 720px;"></div>
+          <div class="arch-details nas-nerf-xxs-color" data-arch="NAS-NeRF-XXS"></div>
+        </figure>
+      </div>
+      <br></br>
+
+      <div class="text">
+        <div class="grid-container">
+          <div class="caption-container nerf-color"><b>NeRF</b></div>
+          <div class="caption-container nas-nerf-s-color"><b>NAS-NeRF S</b></div>
+          <div class="caption-container nas-nerf-xs-color"><b>NAS-NeRF XS</b></div>
+          <div class="caption-container nas-nerf-xxs-color"><b>NAS-NeRF XXS</b></div>
+
+          <div class="image-container"><img src="static/gifs/chair-NeRF-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/chair-NAS-NeRF-S-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/chair-NAS-NeRF-XS-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/chair-NAS-NeRF-XXS-render-interpolate-rgb_fine.gif"></div>
+
+          <div class="image-container"><img src="static/gifs/drums-NeRF-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/drums-NAS-NeRF-S-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/drums-NAS-NeRF-XS-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/drums-NAS-NeRF-XXS-render-interpolate-rgb_fine.gif"></div>
+
+          <div class="image-container"><img src="static/gifs/ficus-NeRF-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/ficus-NAS-NeRF-S-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/ficus-NAS-NeRF-XS-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/ficus-NAS-NeRF-XXS-render-interpolate-rgb_fine.gif"></div>
+
+          <div class="image-container"><img src="static/gifs/hotdog-NeRF-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/hotdog-NAS-NeRF-S-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/hotdog-NAS-NeRF-XS-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/hotdog-NAS-NeRF-XXS-render-interpolate-rgb_fine.gif"></div>
+
+          <div class="image-container"><img src="static/gifs/lego-NeRF-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/lego-NAS-NeRF-S-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/lego-NAS-NeRF-XS-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/lego-NAS-NeRF-XXS-render-interpolate-rgb_fine.gif"></div>
+
+          <div class="image-container"><img src="static/gifs/materials-NeRF-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/materials-NAS-NeRF-S-render-interpolate-rgb_fine.gif">
+          </div>
+          <div class="image-container"><img src="static/gifs/materials-NAS-NeRF-XS-render-interpolate-rgb_fine.gif">
+          </div>
+          <div class="image-container"><img src="static/gifs/materials-NAS-NeRF-XXS-render-interpolate-rgb_fine.gif">
+          </div>
+
+          <div class="image-container"><img src="static/gifs/mic-NeRF-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/mic-NAS-NeRF-S-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/mic-NAS-NeRF-XS-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/mic-NAS-NeRF-XXS-render-interpolate-rgb_fine.gif"></div>
+
+          <div class="image-container"><img src="static/gifs/ship-NeRF-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/ship-NAS-NeRF-S-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/ship-NAS-NeRF-XS-render-interpolate-rgb_fine.gif"></div>
+          <div class="image-container"><img src="static/gifs/ship-NAS-NeRF-XXS-render-interpolate-rgb_fine.gif"></div>
+
+          <div class="caption-container nerf-color"><b>NeRF</b></div>
+          <div class="caption-container nas-nerf-s-color"><b>NAS-NeRF S</b></div>
+          <div class="caption-container nas-nerf-xs-color"><b>NAS-NeRF XS</b></div>
+          <div class="caption-container nas-nerf-xxs-color"><b>NAS-NeRF XXS</b></div>
+        </div>
+      </div>
+
+      <br></br>
+    </section>
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3" align="left">NAS-NeRF Field Cell Architecture</h2>
+        <div class="content has-text-justified">
+          <p>
+            The NAS-NeRF pipeline is composed of all the components of the
+            classic NeRF pipeline, along with two NAS-NeRF field cells in
+            series for performing the coarse and fine hierarchical sampling.
+            The nature of our parameterization ensures that the NAS-NeRF
+            field cell can be plugged into most other NeRF methods, as our
+            optimizations revolve entirely around the core network
+            architectures.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="figure-container">
+      <img src="./static/nas_nerf_cell.jpg" alt="NAS-NeRF Field Cell">
+    </div>
+    <br></br>
+
+    <br></br>
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3" align="left">Generated Architectures</h2>
+        <div class="content has-text-justified">
+          <p>
+            Architecture efficiency ratio vs. synthesis quality (SSIM) (top)
+            and inference speed (bottom), marker size ∝ parameter count.
+            Here, architecture efficiency ratio is a measure of the number
+            of FLOPs required for inference on the baseline NeRF
+            architecture relative to the generated NAS-NeRF architecture.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="figure-container">
+      <img src="./static/generated_candidates_ssim_fps.jpg" alt="Architecture Efficiency Ratio vs. Synthesis Quality">
+    </div>
+    <br></br>
+  </section>
+
+  <section class="section" id="BibTeX">
+    <div class="container is-max-desktop content">
+      <h2 class="title">BibTeX</h2>
+      <pre><code>@article{nair2023nerf,
+  author    = {Nair, Saeejith and Chen, Yuhao and Shafiee, Mohammad Javad and Wong, Alexander},
+  title     = {NAS-NeRF: Generative Neural Architecture Search for Neural Radiance Fields},
+  journal   = {arXiv preprint arXiv:2309.14293},
+  year      = {2023},
+}</code></pre>
+    </div>
+  </section> -->
+
+    <footer class="footer">
+      <div class="container">
+        <div class="content has-text-centered">
+          <a class="icon-link" href="https://youtu.be/dQw4w9WgXcQ">
+            <i class="fas fa-file-pdf"></i>
+          </a>
+          <a class="icon-link" href="https://github.com/saeejithnair/darlei" class="external-link" disabled>
+            <i class="fab fa-github"></i>
+          </a>
+        </div>
+        <div class="columns is-centered">
+          <div class="column is-8">
+            <div class="content">
+              <p>
+                This website is built based on <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>,
+                and <a href="https://github.com/AIBluefisher/dbarf">DBARF</a>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- <script src="./static/js/magnifier.js"></script> -->
+    <!-- <script> imageZoom("reference", ["zoomed-imap", "zoomed-nice", "zoomed-eslam" ], 7); </script> -->
+    <!-- <script> imageZoom("reference_mesh", ["zoomed-nerf_rgb", "zoomed-nas-nerf-s_rgb", "zoomed-nas-nerf-xs_rgb", "zoomed-nas-nerf-xxs_rgb"], 8); </script> -->
+
+</body>
+
+</html>

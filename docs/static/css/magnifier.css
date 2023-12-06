@@ -1,0 +1,58 @@
+* {box-sizing: border-box;}
+
+figure {
+    display: inline-block;
+    margin: 10px; /* adds a little space between the figures */
+}
+
+figure figcaption {
+    text-align: center;
+}
+
+.img-zoom-container {
+    position: relative;
+    overflow-x: auto;
+    white-space: nowrap;
+    display: flex;
+    /* this will make the figures wrap on smaller screens*/
+    flex-wrap: wrap;
+    /* this will center the figures */
+    justify-content: center;
+} 
+
+.img-zoom-container img {
+    border: 1px solid #d4d4d4;
+    height: 228px;
+}
+
+.img-zoom-lens {
+    position: absolute;
+    border: 3px;
+    border-color:yellow;
+    
+    width: 80px;
+    height: 80px;
+}
+
+.img-zoom-result {
+    display: inline-flex;
+    border: 1px solid #d4d4d4;
+    /*set the size of the result div:*/
+    width: 228px;
+    height: 228px;
+}
+
+@media (max-width: 768px) { /* this breakpoint can be adjusted */
+    figure {
+      flex: 1 0 calc(50% - 20px); /* takes 50% of the container width minus the margin */
+    }
+  }
+
+.arch-details {
+    position: relative;
+    background-color: rgba(255,255,255,0.6); /* white with slight transparency */
+    text-align: center;
+    font-size: 0.8em;
+    z-index: 10; /* to ensure it stays on top */
+}
+
